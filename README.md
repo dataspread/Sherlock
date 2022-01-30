@@ -30,4 +30,4 @@ To run the project with docker, use the following command:
   docker-compose up -d
   ```
 
-
+Currently, only the backend API is started with docker.
