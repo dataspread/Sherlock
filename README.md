@@ -3,12 +3,12 @@
 ## **Development Quick Start**
 
 ### **Starting the backend server:**
-  1. Open a new terminal and navigate to the `api` folder.
+  1. Open a new terminal and navigate to the `web-server` folder.
       ```sh
-      cd api
+      cd web-server
       ```
 
-  2. Start the server from `App.java`
+  2. Start the server from `App.java`. If using vscode (and you have the Java development extension), you can use the play button to launch the app from App.java.
 
 ### **Starting the Excel add-in server:**
   1. Open a new terminal and navigate to the `add-in` folder.
