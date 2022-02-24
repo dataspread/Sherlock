@@ -1,17 +1,21 @@
 package dataspread.taco;
 
-import static spark.Spark.*;
+import static spark.Spark.post;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
+import org.dataspread.sheetanalyzer.SheetAnalyzer;
 
 import dataspread.taco.TacoService.PatternType;
 import dataspread.utils.Controller;
 import dataspread.utils.Utils;
-
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonArray;
-import com.google.gson.Gson;
 import spark.RouteGroup;
-import java.util.Map;
 
 public class TacoController implements Controller {
 
@@ -30,12 +34,17 @@ public class TacoController implements Controller {
           JsonArray mtx = formulae.getAsJsonArray();
           String[][] fMtx = Utils.jsonMtxToStringMtx(mtx);
           PatternType[][] hMtx = TacoService.getPatterns(fMtx);
-          return new Gson().toJson(Map.of("data", hMtx));
+
+          Map<String, String[][]> spreadsheetContent = new HashMap<>();
+          spreadsheetContent.put("default-sheet-name", fMtx);
+          SheetAnalyzer sheetAnalyzer = SheetAnalyzer.createSheetAnalyzer(spreadsheetContent);
+
+          return new Gson().toJson(Map.of("data", hMtx, "taco", sheetAnalyzer.getTACODepGraphs()));
         } else {
           return new Gson().toJson(Map.of("data", new String[0]));
         }
       });
     };
   }
-  
+
 }
