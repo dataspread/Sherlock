@@ -5,6 +5,8 @@ import { TacoApi } from "../../api/taco";
 import { ColorMap } from "../../utils/colormap";
 import Header from "./Header";
 import Progress from "./Progress";
+import Graph from "./Graph";
+import Translations from "../../utils/translations";
 
 const colormap = new ColorMap();
 
@@ -46,7 +48,6 @@ async function getFormulas(context: Excel.RequestContext) {
   const rowOffset = range.rowIndex;
   const colOffset = range.columnIndex;
   const formulas = range.formulas;
-
   return { formulas, rowOffset, colOffset };
 }
 
@@ -101,6 +102,76 @@ async function resetBackgroundColor() {
   }
 }
 
+//TYPEZERO  Long chain, special case of TypeOne
+//TYPEONE   Relative start, Relative end
+//TYPETWO   Relative start, Absolute end
+//TYPETHREE Absolute start, Relative end
+//TYPEFOUR  Absolute start, Absolute end
+//TYPEFIVE  Relative + Relative with gap 1-5
+//TYPESIX   Absolute + Absolute with gap 1-5
+//NOTYPE
+
+let elements = [];
+async function getGraph() {
+  try {
+    await Excel.run(async (context) => {
+      
+      const { formulas, rowOffset, colOffset } = await getFormulas(context);
+      const tacoPatterns = await TacoApi.getPatterns(formulas);
+      const patternMap = new Map();
+      patternMap.set("TYPEZERO","RR");
+      patternMap.set("TYPEONE","RR");
+      patternMap.set("TYPETWO","RF");
+      patternMap.set("TYPETHREE","FR");
+      patternMap.set("TYPEFOUR","FF");
+      patternMap.set("TYPEFIVE","RR Gap");
+      patternMap.set("TYPESIX","RR Gap");
+      patternMap.set("NOTYPE","");
+      elements = [];
+      for (let [_sheetName, sheet] of Object.entries(tacoPatterns)) {
+        for (let [_edgeKey, edges] of Object.entries(sheet)) {
+          for (let edge of edges) {
+            console.log(edge)
+            const patternCoords = {
+              rowStart: edge.ref._row + rowOffset + 1,
+              rowEnd: edge.ref._lastRow + rowOffset + 1,
+              colStart: edge.ref._column + colOffset,
+              colEnd: edge.ref._column + colOffset
+            };
+
+            const depCoords = {
+              rowStart: patternCoords.rowStart - edge.edgeMeta.startOffset.rowOffset,
+              rowEnd: patternCoords.rowEnd - edge.edgeMeta.endOffset.rowOffset,
+              colStart: patternCoords.colStart - edge.edgeMeta.startOffset.colOffset,
+              colEnd: patternCoords.colEnd - edge.edgeMeta.endOffset.colOffset
+            }
+
+            const patternType = patternMap.get(edge.edgeMeta.patternType);
+            let start = `${Translations(patternCoords.rowStart, patternCoords.colStart)}:${Translations(patternCoords.rowEnd, patternCoords.colEnd)}`;
+            elements.push({ data: 
+              {id: start, label: start}
+            });
+            let end = `${Translations(depCoords.rowStart, depCoords.colStart)}:${Translations(depCoords.rowEnd, depCoords.colEnd)}`;
+            elements.push({ data: 
+              {id: end, label: end}
+            });
+            elements.push({ data:
+              { source: start, target: end, label: patternType}
+            });
+          }
+        }
+      }
+      console.log(elements);
+      
+    });
+  } catch (error) {
+    console.error(error);
+    if (error instanceof OfficeExtension.Error) {
+      console.log("Debug info: " + JSON.stringify(error.debugInfo));
+    }
+  }
+}
+
 export default function App({ title, isOfficeInitialized }: { title: string; isOfficeInitialized: boolean }) {
   if (!isOfficeInitialized) {
     return (
@@ -134,10 +205,18 @@ export default function App({ title, isOfficeInitialized }: { title: string; isO
         <DefaultButton
           className="ms-welcome__action"
           iconProps={{ iconName: "ChevronRight" }}
+          onClick={getGraph}
+        >
+          Generate Graph
+        </DefaultButton>
+        <DefaultButton
+          className="ms-welcome__action"
+          iconProps={{ iconName: "ChevronRight" }}
           onClick={clusterFormulae}
         >
           Cluster Formulae! (old)
         </DefaultButton>
+        <Graph elements={elements}/>
       </Stack>
     </div>
   );
