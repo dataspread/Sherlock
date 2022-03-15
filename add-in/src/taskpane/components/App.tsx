@@ -6,7 +6,7 @@ import { ColorMap } from "../../utils/colormap";
 import Header from "./Header";
 import Progress from "./Progress";
 import Graph from "./Graph";
-import Translations from "../../utils/translations";
+import {excelToNums, numsToExcel} from "../../utils/translations";
 
 const colormap = new ColorMap();
 
@@ -60,6 +60,7 @@ async function getTacoPatterns() {
       for (let [_sheetName, sheet] of Object.entries(tacoPatterns)) {
         for (let [_edgeKey, edges] of Object.entries(sheet)) {
           for (let edge of edges) {
+            console.log(edge);
             const {
               ref: { _row, _column, _lastColumn, _lastRow },
             } = edge;
@@ -111,11 +112,9 @@ async function resetBackgroundColor() {
 //TYPESIX   Absolute + Absolute with gap 1-5
 //NOTYPE
 
-let elements = [];
-async function getGraph() {
+async function getGraph(setElements: React.Dispatch<React.SetStateAction<any[]>>) {
   try {
     await Excel.run(async (context) => {
-      
       const { formulas, rowOffset, colOffset } = await getFormulas(context);
       const tacoPatterns = await TacoApi.getPatterns(formulas);
       const patternMap = new Map();
@@ -124,44 +123,69 @@ async function getGraph() {
       patternMap.set("TYPETWO","RF");
       patternMap.set("TYPETHREE","FR");
       patternMap.set("TYPEFOUR","FF");
-      patternMap.set("TYPEFIVE","RR Gap");
-      patternMap.set("TYPESIX","RR Gap");
+      patternMap.set("TYPEFIVE","RR Gap 1");
+      patternMap.set("TYPESIX","RR Gap 2");
+      patternMap.set("TYPESEVEN","RR Gap 3");
+      patternMap.set("TYPEEIGHT","RR Gap 4");
+      patternMap.set("TYPENINE","RR Gap 5");
+      patternMap.set("TYPETEN","RR Gap 6");
+      patternMap.set("TYPEELEVEN","RR Gap 7");
       patternMap.set("NOTYPE","");
-      elements = [];
+      const elements = [];
+      const re = new RegExp("default:")
+      //console.log(`[DEBUG] Window offsets (row: ${rowOffset}, ${colOffset})`);
+      //console.log("[DEBUG]", tacoPatterns);
       for (let [_sheetName, sheet] of Object.entries(tacoPatterns)) {
-        for (let [_edgeKey, edges] of Object.entries(sheet)) {
+        for (let [dep, edges] of Object.entries(sheet)) {
+          //console.log("[DEBUG]", dep);
+          dep = dep.replace("default:", "").replace("(", "").replace(")", "");
           for (let edge of edges) {
-            console.log(edge)
-            const patternCoords = {
+            //console.log("[DEBUG]", edge)
+            const precCoords = {
               rowStart: edge.ref._row + rowOffset + 1,
               rowEnd: edge.ref._lastRow + rowOffset + 1,
               colStart: edge.ref._column + colOffset,
               colEnd: edge.ref._column + colOffset
             };
 
-            const depCoords = {
-              rowStart: patternCoords.rowStart - edge.edgeMeta.startOffset.rowOffset,
-              rowEnd: patternCoords.rowEnd - edge.edgeMeta.endOffset.rowOffset,
-              colStart: patternCoords.colStart - edge.edgeMeta.startOffset.colOffset,
-              colEnd: patternCoords.colEnd - edge.edgeMeta.endOffset.colOffset
+            let depCoords = dep.match(/[A-Z]+[0-9]+/g);
+            let depRow = 0
+            let depCol = 0
+            for (let coord of depCoords) {
+              let c = excelToNums(coord)
+              depRow += c[0]
+              depCol += c[1]
             }
+            depRow = depRow / depCoords.length
+            depCol = depCol / depCoords.length
 
+            const scale = 60;
             const patternType = patternMap.get(edge.edgeMeta.patternType);
-            let start = `${Translations(patternCoords.rowStart, patternCoords.colStart)}:${Translations(patternCoords.rowEnd, patternCoords.colEnd)}`;
-            elements.push({ data: 
-              {id: start, label: start}
+            const prec = `${numsToExcel(precCoords.rowStart, precCoords.colStart)}:${numsToExcel(precCoords.rowEnd, precCoords.colEnd)}`;
+            elements.push({ 
+              data: {id: prec, label: prec},
+              classes: patternType,
+              position: {
+                x: (precCoords.colStart + precCoords.colEnd) / 2 * scale,
+                y: (precCoords.rowStart + precCoords.rowEnd) / 2 * scale
+              }
             });
-            let end = `${Translations(depCoords.rowStart, depCoords.colStart)}:${Translations(depCoords.rowEnd, depCoords.colEnd)}`;
             elements.push({ data: 
-              {id: end, label: end}
+              {id: dep, label: dep},
+              classes: patternType,
+              position: {
+                x: depCol * scale,
+                y: depRow * scale
+              }
             });
             elements.push({ data:
-              { source: start, target: end, label: patternType}
+              { source: prec, target: dep, label: patternType}
             });
           }
         }
       }
-      console.log(elements);
+      //console.log("[DEBUG]", elements);
+      setElements(elements);
       
     });
   } catch (error) {
@@ -173,6 +197,8 @@ async function getGraph() {
 }
 
 export default function App({ title, isOfficeInitialized }: { title: string; isOfficeInitialized: boolean }) {
+  const [elements, setElements] = React.useState([])
+  
   if (!isOfficeInitialized) {
     return (
       <Progress
@@ -205,7 +231,7 @@ export default function App({ title, isOfficeInitialized }: { title: string; isO
         <DefaultButton
           className="ms-welcome__action"
           iconProps={{ iconName: "ChevronRight" }}
-          onClick={getGraph}
+          onClick={() => getGraph(setElements)}
         >
           Generate Graph
         </DefaultButton>

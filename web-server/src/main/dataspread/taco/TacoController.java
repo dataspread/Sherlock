@@ -3,6 +3,7 @@ package dataspread.taco;
 import static spark.Spark.post;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.google.gson.Gson;
@@ -11,6 +12,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import org.dataspread.sheetanalyzer.SheetAnalyzer;
+import org.dataspread.sheetanalyzer.dependency.util.RefWithMeta; //for testing
+import org.dataspread.sheetanalyzer.util.Pair;
+import org.dataspread.sheetanalyzer.util.Ref;
 
 import dataspread.taco.TacoService.PatternType;
 import dataspread.utils.Controller;
