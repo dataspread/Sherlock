@@ -6,27 +6,27 @@ import klay from 'cytoscape-klay';
 cytoscape.use(klay);
 export interface GraphProps {
     elements: Array<any>;
+    scale: number;
 }
 
 export default class Graph extends React.Component<GraphProps> {
     constructor(prop) {
-        super(prop);
-        this.state = {
-            update: false
-        }
+      super(prop);
+      this.state = {
+          elements: this.props
+      }
+      console.log("[DEBUG] made graph obj", this.props);
     }
 
     public render(){
-      const { elements } = this.props;
-      const layout = {
-          name: "grid"
-          // other options
-          //padding: 100,
-          //nodeDimensionsIncludeLabels: true,
-          // idealEdgeLength: 100,
-          //edgeElasticity: 0.1
-          // nodeRepulsion: 8500,
-        };
+      const elements = this.props.elements;
+      for (let i = 0; i < elements.length; i++) {
+        let position = elements[i].position;
+        if (position) {
+          elements[i].position.x =  position.x * this.props.scale;
+          elements[i].position.y =  position.y * this.props.scale;
+        }
+      }
       const cytoscapeStylesheet = [
           {
             selector: "node",
@@ -34,7 +34,8 @@ export default class Graph extends React.Component<GraphProps> {
               width: "label",
               height: "label",
               padding: "6px",
-              shape: "round-rectangle"
+              shape: "round-rectangle",
+              "background-color": "data(color)"
             }
           },
           {
@@ -52,8 +53,10 @@ export default class Graph extends React.Component<GraphProps> {
             style: {
               "curve-style": "bezier",
               "target-arrow-shape": "triangle",
-              width: 1.5,
-              shape: "round-rectangle"
+              width: 3,
+              shape: "round-rectangle",
+              'line-color': 'data(color)',
+              'target-arrow-color': 'data(color)'
             }
           },
           {
@@ -70,56 +73,64 @@ export default class Graph extends React.Component<GraphProps> {
               "text-border-style": "solid",
               "text-border-width": 0.5,
               "text-border-opacity": 1
-      
-              // "text-rotation": "autorotate"
+            }
+          },
+          // {
+          //   selector: ".RR",
+          //   style: {
+          //     'line-color': '#2274A5',
+          //     "background-color": "#2274A5"
+          //   }
+          // },
+          // {
+          //   selector: ".RF",
+          //   style: {
+          //     "background-color": "#F1C40F",
+          //     'line-color': '#F1C40F'
+          //   }
+          // },
+          // {
+          //   selector: ".FR",
+          //   style: {
+          //     "background-color": "#D90368",
+          //     'line-color': '#D90368'
+          //   }
+          // },
+          // {
+          //   selector: ".FF",
+          //   style: {
+          //     "background-color": "#F75C03",
+          //     'line-color': '#F75C03'
+          //   }
+          // },
+          {
+            selector: ".dummy",
+            style: {
+              width: 0
             }
           },
           {
-            selector: ".RR",
+            selector: ".tall",
             style: {
-              "background-color": "#2274A5"
+              "padding-bottom": "12px",
+              "padding-top": "12px"
             }
           },
           {
-            selector: ".RF",
+            selector: ".wide",
             style: {
-              "background-color": "#F1C40F"
-            }
-          },
-          {
-            selector: ".FR",
-            style: {
-              "background-color": "#D90368"
-            }
-          },
-          {
-            selector: ".FF",
-            style: {
-              "background-color": "#F75C03"
+              "padding-left": "12px",
+              "padding-right": "12px"
             }
           }
         ] as Array<cytoscape.Stylesheet>;
         console.log("elements received: ", elements);
-        /*
-      const elements = [
-          { data: { id: "created", label: "Created" } },
-          { data: { id: "started", label: "Started" } },
-          { data: { id: "onhold", label: "On Hold" } },
-          { data: { id: "completed", label: "Completed" } },
-          // edges
-          { data: { source: "created", target: "started", label: 'RR'} },
-          { data: { source: "onhold", target: "started", label: 'RR'} },
-          { data: { source: "started", target: "onhold"} },
-          { data: { source: "started", target: "started"} },
-          { data: { source: "started", target: "completed"} }
-      ]; */
       return <>
       
       <CytoscapeComponent 
               elements={elements} 
               style={ { width: '95%', height: '600px' , left: '2.5%'} } 
               stylesheet = {cytoscapeStylesheet}
-              layout = {layout}
               /></>;
     }
 }

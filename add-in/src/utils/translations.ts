@@ -17,8 +17,9 @@ export function excelToNums (coord: String) {
     let colString = coord.match("[A-Z]+")[0];
     let row = parseInt(coord.match("[0-9]+")[0]);
     let col = 0;
-    for(let p = 0, n = 0; p < colString.length; p++){
-        n = colString.charCodeAt(p) - 64 + n * 26;
+    for(let i = 0; i < colString.length; i++) {
+        col = colString.charCodeAt(i) - 64 + col * 26;
     }
-    return [row, col]
+    //console.log(`[DEBUG] colString: ${colString} = ${col - 1}`)
+    return [row, col - 1];
 }
