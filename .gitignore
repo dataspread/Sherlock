@@ -1,5 +1,6 @@
 node_modules
 .vscode
 target
+.idea
 
 /add-in/dist
