@@ -6,7 +6,7 @@ import { ColorMap } from "../../utils/colormap";
 import Header from "./Header";
 import Progress from "./Progress";
 import Graph from "./Graph";
-import {excelToNums, numsToExcel} from "../../utils/translations";
+import {excelToNums, numsToExcel, getTACOPatterns, getNodeColors} from "../../utils/graphUtils";
 
 const colormap = new ColorMap();
 
@@ -60,7 +60,6 @@ async function getTacoPatterns() {
       for (let [_sheetName, sheet] of Object.entries(tacoPatterns)) {
         for (let [_edgeKey, edges] of Object.entries(sheet)) {
           for (let edge of edges) {
-            console.log(edge);
             const {
               ref: { _row, _column, _lastColumn, _lastRow },
             } = edge;
@@ -103,43 +102,25 @@ async function resetBackgroundColor() {
   }
 }
 
+const paddingScale = 24;
+const defaultHeight = "24px";
+const defaultWidth = "48px";
 async function getGraph(setElements: React.Dispatch<React.SetStateAction<any[]>>) {
   try {
     await Excel.run(async (context) => {
       const { formulas, rowOffset, colOffset } = await getFormulas(context);
       const tacoPatterns = await TacoApi.getPatterns(formulas);
-      const patternMap = new Map();
-      patternMap.set("TYPEZERO","RR");
-      patternMap.set("TYPEONE","RR");
-      patternMap.set("TYPETWO","RF");
-      patternMap.set("TYPETHREE","FR");
-      patternMap.set("TYPEFOUR","FF");
-      patternMap.set("TYPEFIVE","RR Gap 1");
-      patternMap.set("TYPESIX","RR Gap 2");
-      patternMap.set("TYPESEVEN","RR Gap 3");
-      patternMap.set("TYPEEIGHT","RR Gap 4");
-      patternMap.set("TYPENINE","RR Gap 5");
-      patternMap.set("TYPETEN","RR Gap 6");
-      patternMap.set("TYPEELEVEN","RR Gap 7");
-      patternMap.set("NOTYPE","");
-      const colorMap = new Map();
-      colorMap.set("RR", "#2274A5");
-      colorMap.set("RF", "#F1C40F");
-      colorMap.set("FR", "#D90368");
-      colorMap.set("FF", "#F75C03");
+      const patternMap = getTACOPatterns();
+      const colorMap = getNodeColors();
       const elements = [];
       const seenRanges = new Set();
       const rowsToRange = new Map();
       const colsToRange = new Map();
-      //console.log(`[DEBUG] Window offsets (row: ${rowOffset}, ${colOffset})`);
-      //console.log("[DEBUG]", tacoPatterns);
       for (let [_sheetName, sheet] of Object.entries(tacoPatterns)) {
         for (let [prec, edges] of Object.entries(sheet)) {
-          //console.log("[DEBUG]", prec);
           prec = prec.replace("default:", "").replace("(", "").replace(")", "");
 
           let precCoords = prec.match(/[A-Z]+[0-9]+/g);
-          //console.log(`[DEBUG] precCoords: ${precCoords}`);
           let precRow = 0;
           let precCol = 0;
           for (let coord of precCoords) {
@@ -149,9 +130,7 @@ async function getGraph(setElements: React.Dispatch<React.SetStateAction<any[]>>
           }
           precRow = precRow / precCoords.length;
           precCol = precCol / precCoords.length;
-          //console.log(`[DEBUG] ${precRow}, ${precCol}`);
           for (let edge of edges) {
-            console.log("[DEBUG]", edge);
             const depCoords = {
               rowStart: edge.ref._row + rowOffset + 1,
               rowEnd: edge.ref._lastRow + rowOffset + 1,
@@ -171,24 +150,23 @@ async function getGraph(setElements: React.Dispatch<React.SetStateAction<any[]>>
             
             if (!seenRanges.has(prec)) {
               seenRanges.add(prec);
-              if (rowsToRange.has(precRow)) {
-                rowsToRange.get(precRow).push(elements.length);
-              } else {
-                rowsToRange.set(precRow, [elements.length]);
-              }
-              if (colsToRange.has(precCol)) {
-                colsToRange.get(precCol).push(elements.length);
-              } else {
-                colsToRange.set(precCol, [elements.length]);
-              }
+              if (rowsToRange.has(precRow)) { rowsToRange.get(precRow).push(elements.length); } 
+              else { rowsToRange.set(precRow, [elements.length]); }
+              if (colsToRange.has(precCol)) { colsToRange.get(precCol).push(elements.length); } 
+              else { colsToRange.set(precCol, [elements.length]); }
               elements.push({
-                data: {id: prec, label: prec},
+                data: {
+                  id: prec, 
+                  label: prec, 
+                  bgColor: colorMap.get(patternType),
+                  w: defaultWidth,
+                  h: defaultHeight
+                },
                 classes: patternType,
                 position: {
                   x: precCol,
                   y: precRow
-                },
-                color: colorMap.get(patternType)
+                }
               });
             }
             if (!seenRanges.has(dep)) {
@@ -203,53 +181,84 @@ async function getGraph(setElements: React.Dispatch<React.SetStateAction<any[]>>
               } else {
                 colsToRange.set(depCol, [elements.length]);
               }
-              elements.push({ data: 
-                {id: dep, label: dep},
+              elements.push(
+                { data: 
+                  {
+                    id: dep, 
+                    label: dep, 
+                    bgColor: colorMap.get(patternType),
+                    w: defaultWidth,
+                    h: defaultHeight
+                  },
                 classes: patternType,
                 position: {
                   x: depCol,
                   y: depRow
-                },
-                color: colorMap.get(patternType)
+                }
               });
             }
             elements.push({ data:
               { classes: patternType, 
                 source: dep, 
                 target: prec, 
-                label: patternType,
-                color: colorMap.get(patternType)
+                //label: patternType,
+                edgeColor: colorMap.get(patternType)
               }
             });
-            // elements.push({ data:
-            //   { classes: "dummy", source: dep, target: prec}
-            // });
           }
         }
       }
+      // Prevent overlapping nodes and condenses graph
       const condense = true;
       if (rowsToRange.size > 0 && condense) {
         const sortedRows = Array.from(rowsToRange.keys()).sort();
-        let freeSpace = sortedRows[0] as number + 1;
-        console.log("free space", freeSpace)
+        let freeSpace = 0;
         for (let index of sortedRows) {
           for (let elemIndex of rowsToRange.get(index)) {
             elements[elemIndex].position.y = freeSpace;
-            //elements[elemIndex].position.y = freeSpace + Math.random() - .5;
+            //elements[elemIndex].position.y = freeSpace + Math.random() * .4 - .2;
           }
           freeSpace += 1;
         }
 
         const sortedCols = Array.from(colsToRange.keys()).sort();
-        freeSpace = sortedCols[0] as number + 1;
+        freeSpace = 0;
         for (let index of sortedCols) {
           for (let elemIndex of colsToRange.get(index)) {
             elements[elemIndex].position.x = freeSpace;
-           // elements[elemIndex].position.x = freeSpace + Math.random() - .5;
+            //elements[elemIndex].position.x = freeSpace + Math.random() * .4 - .2;
           }
           freeSpace += 1;
         }
       }
+
+      // Attempts to prevent overlapping edges
+      // if (rowsToRange.size > 0 && condense) {
+      //   const sortedRows = Array.from(rowsToRange.keys()).sort();
+      //   let freeSpace = 0;
+      //   for (let index of sortedRows) {
+      //     let elemIndexes = rowsToRange.get(index).sort();
+      //     if (elemIndexes.length > 2) {
+      //       for (let i = 0; i < elemIndexes.length; i++) {
+      //         for (let j = i + 1; j < elemIndexes.length; j++) {
+
+      //         }
+      //       }
+      //     }
+      //       //elements[elemIndex].position.y = freeSpace + Math.random() * .5 - .25;
+      //     }
+      //   }
+
+      //   const sortedCols = Array.from(colsToRange.keys()).sort();
+      //   freeSpace = 0;
+      //   for (let index of sortedCols) {
+      //     for (let elemIndex of colsToRange.get(index)) {
+      //       elements[elemIndex].position.x = freeSpace;
+      //       //elements[elemIndex].position.x = freeSpace + Math.random() * .5 - .25;
+      //     }
+      //   }
+      // }
+
       setElements(elements);
     });
   } catch (error) {
@@ -308,7 +317,6 @@ export default function App({ title, isOfficeInitialized }: { title: string; isO
         >
           Cluster Formulae! (old)
         </DefaultButton>
-        <script>cytoGraph.render();</script>
         <Graph elements={elements} scale = {75}/>
       </Stack>
     </div>

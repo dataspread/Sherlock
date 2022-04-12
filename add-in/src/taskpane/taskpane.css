@@ -17,9 +17,11 @@
  }
  
  .ms-welcome__header {
-    padding: 10px;
-    padding-bottom: 5px;
-    padding-top: 10px;
+    padding: 2px;
+    padding-bottom: 2px;
+    padding-top: 2px;
+    border-top: 1px;
+    border-bottom: 1px;
     display: -webkit-flex;
     display: flex;
     -webkit-flex-direction: column;
@@ -38,7 +40,7 @@
     align-items: center;
     -webkit-flex: 1 0 0;
     flex: 1 0 0;
-    padding: 5px 20px;
+    padding: 2px 20px;
  }
  
  .ms-welcome__main > h2 {
@@ -62,7 +64,7 @@
  }
  
  .ms-welcome__action.ms-Button--hero {
-     margin-top: 30px;
+     margin-top: 10px;
  }
  
 .ms-Button.ms-Button--hero .ms-Button-label {
