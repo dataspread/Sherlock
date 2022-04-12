@@ -8,12 +8,14 @@ specifiers:
   '@types/office-js': ^1.0.239
   '@types/office-runtime': ^1.0.23
   '@types/react': ^16.14.23
+  '@types/react-cytoscapejs': ^1.2.2
   '@types/react-dom': ^16.9.14
   '@types/webpack': ^4.41.32
   acorn: ^8.7.0
   babel-loader: ^8.2.3
   copy-webpack-plugin: ^9.1.0
   core-js: ^3.21.1
+  cytoscape: ^3.21.0
   es6-promise: ^4.2.8
   eslint: ^7.32.0
   eslint-plugin-office-addins: ^1.1.4
@@ -33,6 +35,7 @@ specifiers:
   os-browserify: ^0.3.0
   process: ^0.11.10
   react: ^16.14.0
+  react-cytoscapejs: ^1.2.1
   react-dom: ^16.14.0
   react-hot-loader: ^4.13.0
   regenerator-runtime: ^0.13.9
@@ -58,11 +61,13 @@ devDependencies:
   '@types/office-js': 1.0.239
   '@types/office-runtime': 1.0.23
   '@types/react': 16.14.23
+  '@types/react-cytoscapejs': 1.2.2
   '@types/react-dom': 16.9.14
   '@types/webpack': 4.41.32
   acorn: 8.7.0
   babel-loader: 8.2.3_9351ded4f79a023849d74b5df047d562
   copy-webpack-plugin: 9.1.0_webpack@5.69.1
+  cytoscape: 3.21.0
   eslint: 7.32.0
   eslint-plugin-office-addins: 1.1.4
   eslint-plugin-react: 7.28.0_eslint@7.32.0
@@ -80,6 +85,7 @@ devDependencies:
   office-addin-prettier-config: 1.1.5
   os-browserify: 0.3.0
   process: 0.11.10
+  react-cytoscapejs: 1.2.1_react-dom@16.14.0+react@16.14.0
   react-hot-loader: 4.13.0_5fdc78b2d00ae152697678390be7c46d
   source-map-loader: 3.0.1_webpack@5.69.1
   ts-loader: 9.2.6_typescript@4.5.5+webpack@5.69.1
@@ -641,6 +647,10 @@ packages:
       fastq: 1.13.0
     dev: true
 
+  /@types/cytoscape/3.19.4:
+    resolution: {integrity: sha512-0IozTg1vdZrA3nuAK5o9Pa8nl2INUnTaXwcGwoiALDcsD8/TiVnp0Zi+R1IiPRG6edoy0Ya61/3osFLtfkhhmw==}
+    dev: true
+
   /@types/eslint-scope/3.7.3:
     resolution: {integrity: sha512-PB3ldyrcnAicT35TWPs5IcwKD8S333HMaa2VVv4+wdvebJkjWuW/xESoB8IwRcog8HYVYamb1g/R31Qv5Bx03g==}
     dependencies:
@@ -687,6 +697,13 @@ packages:
 
   /@types/prop-types/15.7.4:
     resolution: {integrity: sha512-rZ5drC/jWjrArrS8BR6SIr4cWpW09RNTYt9AMZo3Jwwif+iacXAqgVjm0B0Bv/S1jhDXKHqRVNCbACkJ89RAnQ==}
+    dev: true
+
+  /@types/react-cytoscapejs/1.2.2:
+    resolution: {integrity: sha512-Z+CeQLw4XyQOrS/SdbcUCdYfWqYmaPS/WT+gNy33KYR09BtVzekx1jeNU5kNDvXCv8/8jGlhSrSk0uO7ocGuFg==}
+    dependencies:
+      '@types/cytoscape': 3.19.4
+      '@types/react': 16.14.23
     dev: true
 
   /@types/react-dom/16.9.14:
@@ -1624,6 +1641,17 @@ packages:
     resolution: {integrity: sha512-2u44ZG2OcNUO9HDp/Jl8C07x6pU/eTR3ncV91SiK3dhG9TWvRVsCoJw14Ckx5DgWkzGA3waZWO3d7pgqpUI/XA==}
     dev: true
 
+  /cytoscape/3.21.0:
+    resolution: {integrity: sha512-xPINMzQNGN4WIog93gYRScT4y/CyZMmqunnhU59/8LynhWwzepJtUydMfvIPuz5TmJ9rSCMdw6rmxhfbb1eofw==}
+    engines: {node: '>=0.10'}
+    dependencies:
+      heap: 0.2.7
+      lodash.debounce: 4.0.8
+      lodash.get: 4.4.2
+      lodash.set: 4.3.2
+      lodash.topath: 4.5.2
+    dev: true
+
   /debug/2.6.9:
     resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
     dependencies:
@@ -2557,6 +2585,10 @@ packages:
     hasBin: true
     dev: true
 
+  /heap/0.2.7:
+    resolution: {integrity: sha512-2bsegYkkHO+h/9MGbn6KWcE45cHZgPANo5LXF7EvWdT0yT2EguSVO1nDgU5c8+ZOPwp2vMNa7YFsJhVcDR9Sdg==}
+    dev: true
+
   /hoist-non-react-statics/3.3.2:
     resolution: {integrity: sha512-/gGivxi8JPKWNm/W0jSmzcMPpfpPLc3dY/6GxhX2hQ9iGj3aDfklV4ET7NjKpSinLpJ5vafa9iiGIEZg10SfBw==}
     dependencies:
@@ -3203,12 +3235,28 @@ packages:
       p-locate: 4.1.0
     dev: true
 
+  /lodash.debounce/4.0.8:
+    resolution: {integrity: sha1-gteb/zCmfEAF/9XiUVMArZyk168=}
+    dev: true
+
+  /lodash.get/4.4.2:
+    resolution: {integrity: sha1-LRd/ZS+jHpObRDjVNBSZ36OCXpk=}
+    dev: true
+
   /lodash.merge/4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
     dev: true
 
+  /lodash.set/4.3.2:
+    resolution: {integrity: sha1-2HV7HagH3eJIFrDWqEvqGnYjCyM=}
+    dev: true
+
   /lodash.sortby/4.7.0:
     resolution: {integrity: sha1-7dFMgk4sycHgsKG0K7UhBRakJDg=}
+    dev: true
+
+  /lodash.topath/4.5.2:
+    resolution: {integrity: sha1-NhY1Hzu6YZlKCTGYlmC9AyVP0Ak=}
     dev: true
 
   /lodash.truncate/4.4.2:
@@ -3974,6 +4022,19 @@ packages:
       http-errors: 1.8.1
       iconv-lite: 0.4.24
       unpipe: 1.0.0
+    dev: true
+
+  /react-cytoscapejs/1.2.1_react-dom@16.14.0+react@16.14.0:
+    resolution: {integrity: sha512-8exVCetpzyGCAKuRjXPWGjFCnb22boZ3SXUPpPB/+wQI8Q8BwkT1URN3A7J1Czvj1qAbShh5QQ514mBUp7i7kw==}
+    engines: {node: '>=8.11.3'}
+    peerDependencies:
+      react: '>=15.0.0'
+      react-dom: '>=15.0.0'
+    dependencies:
+      cytoscape: 3.21.0
+      prop-types: 15.8.1
+      react: 16.14.0
+      react-dom: 16.14.0_react@16.14.0
     dev: true
 
   /react-dom/16.14.0_react@16.14.0:
