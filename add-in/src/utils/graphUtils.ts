@@ -49,3 +49,19 @@ export function getNodeColors() {
     nodeColors.set("FF", "#F75C03");
     return nodeColors;
 }
+
+export function appendToMapValue(map: Map<object, Array<object>>, key, value) {
+    if (map.has(key)) {
+        map.get(key).push(value);
+    } else {
+        map.set(key, [value]);
+    }
+}
+
+function numToPX(num: number) {
+    return num.toString() + "px"
+}
+
+export function scaleWidth(word: string) {
+    return numToPX(word.length * 8 + 8);
+}

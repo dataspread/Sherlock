@@ -43,7 +43,7 @@ public class TacoController implements Controller {
           spreadsheetContent.put("default-sheet-name", fMtx);
           SheetAnalyzer sheetAnalyzer = SheetAnalyzer.createSheetAnalyzer(spreadsheetContent);
 
-          debug(sheetAnalyzer.getTACODepGraphs());
+          //debug(sheetAnalyzer.getTACODepGraphs());
 
           return new Gson().toJson(Map.of("data", hMtx, "taco", sheetAnalyzer.getTACODepGraphs()));
         } else {
