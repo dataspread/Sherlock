@@ -5,6 +5,8 @@ import { TacoApi } from "../../api/taco";
 import { ColorMap } from "../../utils/colormap";
 import Header from "./Header";
 import Progress from "./Progress";
+import Graph, { GraphMeta } from "./Graph";
+import {excelToNums, numsToExcel, getTACOPatterns, getNodeColors, appendToMapValue, scaleWidth} from "../../utils/graphUtils";
 
 const colormap = new ColorMap();
 
@@ -46,7 +48,6 @@ async function getFormulas(context: Excel.RequestContext) {
   const rowOffset = range.rowIndex;
   const colOffset = range.columnIndex;
   const formulas = range.formulas;
-
   return { formulas, rowOffset, colOffset };
 }
 
@@ -101,7 +102,32 @@ async function resetBackgroundColor() {
   }
 }
 
+async function getGraph(setGraphMeta: React.Dispatch<React.SetStateAction<GraphMeta>>) {
+  try {
+    await Excel.run(async (context) => {
+      const { formulas, rowOffset, colOffset } = await getFormulas(context);
+      const tacoPatterns = await TacoApi.getPatterns(formulas);
+      setGraphMeta({
+        tacoPatterns: tacoPatterns,
+        rowOffset: rowOffset,
+        colOffset: colOffset
+      })
+    });
+  } catch (error) {
+    console.error(error);
+    if (error instanceof OfficeExtension.Error) {
+      console.log("Debug info: " + JSON.stringify(error.debugInfo));
+    }
+  }
+}
+
 export default function App({ title, isOfficeInitialized }: { title: string; isOfficeInitialized: boolean }) {
+  const [graphMeta, setGraphMeta] = React.useState({
+    tacoPatterns: null,
+    rowOffset: 0,
+    colOffset: 0
+  });
+  console.log(graphMeta);
   if (!isOfficeInitialized) {
     return (
       <Progress
@@ -116,7 +142,7 @@ export default function App({ title, isOfficeInitialized }: { title: string; isO
     <div className="ms-welcome">
       <Header logo={require("./../../../assets/logo-filled.png")} title={title} message="Sheet Analyzer" />
       <p className="ms-font-l">Select a group of cells and press one of the buttons below!</p>
-      <Stack tokens={{ childrenGap: 10 }}>
+      <Stack tokens={{ childrenGap: 5 }}>
         <DefaultButton
           className="ms-welcome__action"
           iconProps={{ iconName: "ChevronRight" }}
@@ -134,10 +160,11 @@ export default function App({ title, isOfficeInitialized }: { title: string; isO
         <DefaultButton
           className="ms-welcome__action"
           iconProps={{ iconName: "ChevronRight" }}
-          onClick={clusterFormulae}
+          onClick={() => getGraph(setGraphMeta)}
         >
-          Cluster Formulae! (old)
+          Generate Graph
         </DefaultButton>
+        <Graph graphMeta={graphMeta} scale={100}/>
       </Stack>
     </div>
   );
