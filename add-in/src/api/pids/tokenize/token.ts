@@ -1,7 +1,7 @@
 import BigDecimal from "bigdecimal";
 import { hashCode } from "../utils/hash";
 
-abstract class Token {
+export abstract class Token {
   value: string;
   isData = false;
   length = 1;

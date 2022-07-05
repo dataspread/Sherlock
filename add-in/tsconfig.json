@@ -13,21 +13,14 @@
     "noImplicitReturns": true,
     "noUnusedParameters": true,
     "esModuleInterop": true,
-    "lib": [
-      "es7",
-      "dom"
-    ],
+    "lib": ["es7", "dom", "es2019"],
     "pretty": true,
-    "typeRoots": [
-      "node_modules/@types"
-    ]
+    "typeRoots": ["node_modules/@types"]
   },
-  "exclude": [
-    "node_modules"
-  ],
+  "exclude": ["node_modules"],
   "compileOnSave": false,
   "buildOnSave": false,
-  "ts-node": { 
-    "files": true 
+  "ts-node": {
+    "files": true
   }
 }
