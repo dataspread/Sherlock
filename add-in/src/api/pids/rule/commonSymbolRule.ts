@@ -2,10 +2,9 @@ import { RewriteRule } from "./rewriteRule";
 import { PUnion, PSeq, PToken, PEmpty } from "../pattern/pattern";
 import { TSymbol } from "../tokenize/token";
 import { CommonSeq } from "./commonSeq";
+import { stringifyArray, stringifyMatrix } from "../utils/stringify";
 
 export class CommonSymbolRule extends RewriteRule {
-  static threshold = 0.4;
-
   condition(ptn) {
     if (!(ptn instanceof PUnion)) {
       return false;
@@ -71,21 +70,11 @@ export class CommonSymbolRule extends RewriteRule {
         }
       });
 
-    if (validLinesWithIndex.size === 0) {
+    if (noSymbolLines.size > 0) {
       return union;
     }
 
-    // If there is at least one line with no symbol, the common symbol found is optional
-    let optionalSymbol = noSymbolLines.size !== 0;
     let validLines = Array.from(validLinesWithIndex).map((value) => value[0]);
-    let validIndexMapping = Array.from(validLinesWithIndex)
-      .map((value) => value[1])
-      .map((value, idx) => [value, idx])
-      .reduce((acc, val) => {
-        const [key, value] = val;
-        acc[key] = value;
-        return acc;
-      }, {});
 
     // Determine common symbols and match symbol in each line to the common
     let commonSeq = new CommonSeq();
@@ -98,7 +87,7 @@ export class CommonSymbolRule extends RewriteRule {
       let idx = 0;
       let commonSymbolLine = [];
       commonSymbols.forEach((symbol) => {
-        while (symbol.token.value !== line[idx][0].token.value) {
+        while (line[idx] && symbol.token.value !== line[idx][0].token.value) {
           idx += 1;
         }
         commonSymbolLine.push(line[idx]);
@@ -108,6 +97,7 @@ export class CommonSymbolRule extends RewriteRule {
 
     // Package new union split by common symbols
     let resultSeq = [];
+    this.happen();
     commonSymbols.forEach((symbol, symbolIdx) => {
       let beforeSymbolUnion = [];
       let nonEmpty: boolean = false;

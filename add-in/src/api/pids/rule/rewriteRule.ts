@@ -7,8 +7,6 @@ export abstract class RewriteRule {
 
   happen = () => (this.modified = true);
 
-  happened = this.modified;
-
   reset = () => (this.modified = false);
 
   rewrite(root) {
@@ -18,7 +16,7 @@ export abstract class RewriteRule {
     if (root instanceof PUnion) {
       let union: PUnion = root;
       if (this.condition(union)) {
-        this.update(union);
+        result = this.update(union);
       } else {
         let modifiedContent = union.content.map((p) => this.rewrite(p));
         result = this.modified ? new PUnion(modifiedContent) : union;
@@ -26,7 +24,7 @@ export abstract class RewriteRule {
     } else if (root instanceof PSeq) {
       let seq: PSeq = root;
       if (this.condition(seq)) {
-        this.update(seq);
+        result = this.update(seq);
       } else {
         let modifiedContent = seq.content.map((p) => this.rewrite(p));
         result = this.modified ? new PSeq(modifiedContent) : seq;

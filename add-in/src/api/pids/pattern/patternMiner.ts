@@ -1,11 +1,12 @@
 import { Tokenizer } from "../tokenize/tokenizer";
 import { Pattern, PUnion, PSeq, PToken } from "./pattern";
 import { CommonSymbolRule } from "../rule/commonSymbolRule";
+import { SameItemRule } from "../rule/sameItemRule";
 
 export class PatternMiner {
   sampleSize = 500;
 
-  rules = [new CommonSymbolRule()]; // fill in with rules later
+  rules = [new CommonSymbolRule(), new SameItemRule()];
 
   mine(lines) {
     let tokens = lines.map((line) => Tokenizer.tokenize(line));
@@ -32,10 +33,10 @@ export class PatternMiner {
       const rule = this.rules[i];
       rule.reset();
       current = rule.rewrite(current);
-      if (rule.happened) {
+      if (rule.modified) {
         return [current, rule];
       }
     }
-    return [root, null];
+    return [current, null];
   }
 }

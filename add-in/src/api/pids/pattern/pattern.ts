@@ -146,7 +146,7 @@ abstract class PAny extends Pattern {
   }
 }
 
-class PIntAny extends PAny {
+export class PIntAny extends PAny {
   hasHex = false;
 
   constructor(minl = 1, maxl = -1, hasHex = false) {
@@ -164,7 +164,7 @@ class PIntAny extends PAny {
   override toString = () => `<intany ${this.minLength}:${this.maxLength}, ${this.hasHex}>`;
 }
 
-class PLetterAny extends PAny {
+export class PLetterAny extends PAny {
   constructor(minl = 1, maxl = -1) {
     super(minl, maxl);
   }
@@ -175,7 +175,7 @@ class PLetterAny extends PAny {
 /**
  * Mix of letter and digits
  */
-class PLabelAny extends PAny {
+export class PLabelAny extends PAny {
   constructor(minl = 1, maxl = -1) {
     super(minl, maxl);
   }
@@ -183,7 +183,7 @@ class PLabelAny extends PAny {
   override toString = () => `<labelany ${this.minLength}:${this.maxLength}>`;
 }
 
-class PWordAny extends PAny {
+export class PWordAny extends PAny {
   constructor(minl = 1, maxl = -1) {
     super(minl, maxl);
   }
