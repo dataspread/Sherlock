@@ -24,7 +24,7 @@ export class PatternMiner {
         refineResult = refined[0];
       }
     }
-    return refineResult;
+    return this.repack(refineResult, lines.length);
   }
 
   refine(root) {
@@ -38,5 +38,34 @@ export class PatternMiner {
       }
     }
     return [current, null];
+  }
+
+  repack(splitArr, entries) {
+    let result = [];
+    let getPSeqString = (seq) => seq.content.map((token) => token.toString()).join("");
+    for (let idx = 0; idx < entries; idx += 1) {
+      let line = [];
+      let str: string;
+      splitArr.forEach((item) => {
+        if (item instanceof PUnion) {
+          let val = item.content[idx];
+          if (val instanceof PSeq) {
+            str = getPSeqString(val);
+          } else if (val instanceof PToken) {
+            str = val.token.toString();
+          }
+        } else if (item instanceof PSeq) {
+          str = getPSeqString(item);
+        } else if (item instanceof PToken) {
+          str = item.token.toString();
+        } else {
+          str = item.toString();
+        }
+        line.push(str);
+      });
+      result.push(line);
+    }
+
+    return result;
   }
 }

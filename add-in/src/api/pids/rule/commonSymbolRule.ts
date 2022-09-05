@@ -2,7 +2,6 @@ import { RewriteRule } from "./rewriteRule";
 import { PUnion, PSeq, PToken, PEmpty } from "../pattern/pattern";
 import { TSymbol } from "../tokenize/token";
 import { CommonSeq } from "./commonSeq";
-import { stringifyArray, stringifyMatrix } from "../utils/stringify";
 
 export class CommonSymbolRule extends RewriteRule {
   condition(ptn) {
@@ -56,6 +55,8 @@ export class CommonSymbolRule extends RewriteRule {
           return false;
         })
     );
+
+    console.log(symbolsWithPos);
 
     // Valid lines have at least one symbol
     let noSymbolLines = new Set<number>();
@@ -118,6 +119,25 @@ export class CommonSymbolRule extends RewriteRule {
       }
       resultSeq.push(symbol);
     });
+
+    let afterSymbolUnion = [];
+    let nonEmpty = false;
+    commonSymbolsWithPos.forEach((line, lineIdx) => {
+      let startIdx = line[line.length - 1][1] + 1;
+      const unionLine: any[] = union.content[lineIdx].content;
+      let endIdx = unionLine.length;
+
+      if (endIdx - startIdx > 0) {
+        let unit = unionLine.slice(startIdx, endIdx);
+        afterSymbolUnion.push(new PSeq(unit));
+        nonEmpty = true;
+      } else {
+        afterSymbolUnion.push(new PEmpty());
+      }
+    });
+    if (nonEmpty) {
+      resultSeq.push(new PUnion(afterSymbolUnion));
+    }
 
     return new PSeq(resultSeq);
   }
