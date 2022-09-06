@@ -13,3 +13,17 @@ export function stringifyMatrix(mat) {
   }
   return result;
 }
+
+export function stringifyTensor(tensor, deg) {
+  if (deg === 1) {
+    return stringifyArray(tensor);
+  }
+  if (deg === 2) {
+    return stringifyMatrix(tensor);
+  }
+  let result = [];
+  for (let i = 0; i < tensor.length; i += 1) {
+    result.push(stringifyTensor(tensor[i], deg - 1));
+  }
+  return result;
+}

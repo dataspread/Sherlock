@@ -13,17 +13,6 @@ const conds = [
       }
     },
   },
-  //   {
-  //     name: "double",
-  //     tester: function (tested) {
-  //       var regResult = tested.match(/[+-]?([0-9]*[.])?[0-9]+/);
-  //       if (regResult && regResult[0] === tested) {
-  //         return lexerResults.possible;
-  //       } else {
-  //         return lexerResults.none;
-  //       }
-  //     },
-  //   },
   {
     name: "int",
     tester: function (tested) {
@@ -61,22 +50,32 @@ const conds = [
 export class Lexer {
   static lex(str) {
     let tokens = lexer(str, conds);
-    return tokens.map((token) => {
-      switch (token.type) {
-        case "word":
-          return new TWord(token.value);
-        case "int":
-          return new TInt(parseInt(token.value));
-        case "double":
-          return new TDouble(parseFloat(token.value));
-        case "symbol":
-          return new TSymbol(token.value);
-        case "space":
-          return new TSpace();
-        default:
-          console.log("Token type does not exist!");
-          return new TSymbol("");
+    let result = [];
+    tokens.forEach((token) => {
+      let type = token.type;
+      let value = token.value;
+      if (type === "word") {
+        result.push(new TWord(value));
+      } else if (type === "int") {
+        // To handle the edge case of a number starting with a 0, we don't want to remove the 0
+        while (value[0] === "0") {
+          result.push(new TInt(0));
+          value = value.slice(1);
+        }
+        if (value.length !== 0) {
+          result.push(new TInt(parseInt(value)));
+        }
+      } else if (type === "double") {
+        result.push(new TDouble(parseFloat(value)));
+      } else if (type === "symbol") {
+        result.push(new TSymbol(value));
+      } else if (type === "space") {
+        result.push(new TSpace());
+      } else {
+        console.log("Token type does not exist!");
+        result.push(new TSymbol(""));
       }
     });
+    return result;
   }
 }

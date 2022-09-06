@@ -2,6 +2,7 @@ import { RewriteRule } from "./rewriteRule";
 import { PUnion, PSeq, PToken, PEmpty } from "../pattern/pattern";
 import { TSymbol } from "../tokenize/token";
 import { CommonSeq } from "./commonSeq";
+import { stringifyTensor } from "../utils/stringify";
 
 export class CommonSymbolRule extends RewriteRule {
   condition(ptn) {
@@ -90,6 +91,7 @@ export class CommonSymbolRule extends RewriteRule {
           idx += 1;
         }
         commonSymbolLine.push(line[idx]);
+        idx += 1;
       });
       commonSymbolsWithPos.push(commonSymbolLine);
     });

@@ -18,8 +18,11 @@ export class PatternMiner {
     let toRefine: Pattern = translated;
     let needRefine = true;
     let refineResult: Pattern = toRefine;
+
     while (needRefine) {
+      console.log(toRefine.toString());
       let refined = this.refine(toRefine);
+      console.log(refined[1]);
       if (refined[1] != null) {
         toRefine = refined[0];
       } else {

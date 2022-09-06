@@ -2,6 +2,7 @@ import { RewriteRule } from "./rewriteRule";
 import { PUnion, PSeq, PToken, PEmpty } from "../pattern/pattern";
 import { TWord } from "../tokenize/token";
 import { CommonSeq } from "./commonSeq";
+import { stringifyTensor } from "../utils/stringify";
 
 export class CommonWordRule extends RewriteRule {
   condition(ptn) {
@@ -82,17 +83,20 @@ export class CommonWordRule extends RewriteRule {
 
     // Filter out symbols that are not common
     let commonSymbolsWithPos = [];
-    symbolsWithPos.forEach((line) => {
-      let idx = 0;
-      let commonSymbolLine = [];
-      commonSymbols.forEach((symbol) => {
-        while (line[idx] && symbol.token.value !== line[idx][0].token.value) {
+    if (commonSymbols.length !== 0) {
+      symbolsWithPos.forEach((line) => {
+        let idx = 0;
+        let commonSymbolLine = [];
+        commonSymbols.forEach((symbol) => {
+          while (line[idx] && symbol.token.value !== line[idx][0].token.value) {
+            idx += 1;
+          }
+          commonSymbolLine.push(line[idx]);
           idx += 1;
-        }
-        commonSymbolLine.push(line[idx]);
+        });
+        commonSymbolsWithPos.push(commonSymbolLine);
       });
-      commonSymbolsWithPos.push(commonSymbolLine);
-    });
+    }
 
     // Package new union split by common symbols
     let resultSeq = [];
@@ -121,6 +125,7 @@ export class CommonWordRule extends RewriteRule {
     let afterSymbolUnion = [];
     let nonEmpty = false;
     commonSymbolsWithPos.forEach((line, lineIdx) => {
+      console.log(line);
       let startIdx = line[line.length - 1][1] + 1;
       const unionLine: any[] = union.content[lineIdx].content;
       let endIdx = unionLine.length;
@@ -133,6 +138,7 @@ export class CommonWordRule extends RewriteRule {
         afterSymbolUnion.push(new PEmpty());
       }
     });
+
     if (nonEmpty) {
       resultSeq.push(new PUnion(afterSymbolUnion));
     }
