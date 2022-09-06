@@ -1,9 +1,9 @@
 import { RewriteRule } from "./rewriteRule";
 import { PUnion, PSeq, PToken, PEmpty } from "../pattern/pattern";
-import { TSymbol } from "../tokenize/token";
+import { TWord } from "../tokenize/token";
 import { CommonSeq } from "./commonSeq";
 
-export class CommonSymbolRule extends RewriteRule {
+export class CommonWordRule extends RewriteRule {
   condition(ptn) {
     if (!(ptn instanceof PUnion)) {
       return false;
@@ -50,7 +50,7 @@ export class CommonSymbolRule extends RewriteRule {
         .map((value, index) => [value, index])
         .filter((value) => {
           if (value[0] instanceof PToken) {
-            return value[0].token instanceof TSymbol;
+            return value[0].token instanceof TWord;
           }
           return false;
         })
