@@ -81,22 +81,25 @@ export class CommonWordRule extends RewriteRule {
     const eq = (a: Array<any>, b: Array<any>) => (a[0] as PToken).toString() === (b[0] as PToken).toString();
     let commonSymbols = commonSeq.find(validLines, eq).map((i) => i[0]);
 
+    // If there are no common symbols, do nothing
+    if (commonSymbols.length === 0) {
+      return union;
+    }
+
     // Filter out symbols that are not common
     let commonSymbolsWithPos = [];
-    if (commonSymbols.length !== 0) {
-      symbolsWithPos.forEach((line) => {
-        let idx = 0;
-        let commonSymbolLine = [];
-        commonSymbols.forEach((symbol) => {
-          while (line[idx] && symbol.token.value !== line[idx][0].token.value) {
-            idx += 1;
-          }
-          commonSymbolLine.push(line[idx]);
+    symbolsWithPos.forEach((line) => {
+      let idx = 0;
+      let commonSymbolLine = [];
+      commonSymbols.forEach((symbol) => {
+        while (line[idx] && symbol.token.value !== line[idx][0].token.value) {
           idx += 1;
-        });
-        commonSymbolsWithPos.push(commonSymbolLine);
+        }
+        commonSymbolLine.push(line[idx]);
+        idx += 1;
       });
-    }
+      commonSymbolsWithPos.push(commonSymbolLine);
+    });
 
     // Package new union split by common symbols
     let resultSeq = [];
@@ -125,7 +128,6 @@ export class CommonWordRule extends RewriteRule {
     let afterSymbolUnion = [];
     let nonEmpty = false;
     commonSymbolsWithPos.forEach((line, lineIdx) => {
-      console.log(line);
       let startIdx = line[line.length - 1][1] + 1;
       const unionLine: any[] = union.content[lineIdx].content;
       let endIdx = unionLine.length;

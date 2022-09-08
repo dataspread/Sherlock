@@ -1,4 +1,8 @@
 import { testFormMatrix } from "./testMatrix";
 import { extractPattern } from "../pattern/extractPattern";
+import { readFile, writeArray } from "../utils/file";
 
-extractPattern(testFormMatrix);
+let data = testFormMatrix; //readFile("test_ip.csv");
+let arr = extractPattern(data);
+console.log(arr);
+writeArray(arr, "test.json");

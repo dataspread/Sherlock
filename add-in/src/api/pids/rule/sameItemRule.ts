@@ -1,6 +1,7 @@
 import { RewriteRule } from "./rewriteRule";
 import { PUnion, PSeq, PToken, PEmpty, Pattern } from "../pattern/pattern";
 
+/* If a union has all identical items, combine them into a single Token. */
 export class SameItemRule extends RewriteRule {
   condition(ptn) {
     if (ptn instanceof PUnion || ptn instanceof PSeq) {

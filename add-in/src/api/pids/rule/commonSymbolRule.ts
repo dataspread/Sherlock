@@ -81,6 +81,11 @@ export class CommonSymbolRule extends RewriteRule {
     const eq = (a: Array<any>, b: Array<any>) => (a[0] as PToken).toString() === (b[0] as PToken).toString();
     let commonSymbols = commonSeq.find(validLines, eq).map((i) => i[0]);
 
+    // If there are no common symbols, do nothing
+    if (commonSymbols.length === 0) {
+      return union;
+    }
+
     // Filter out symbols that are not common
     let commonSymbolsWithPos = [];
     symbolsWithPos.forEach((line) => {
