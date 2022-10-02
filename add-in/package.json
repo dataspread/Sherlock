@@ -30,9 +30,11 @@
   "dependencies": {
     "@fluentui/font-icons-mdl2": "^8.1.24",
     "@fluentui/react": "^8.55.3",
+    "bigdecimal": "^0.6.1",
     "core-js": "^3.21.1",
     "cytoscape-klay": "^3.1.4",
     "es6-promise": "^4.2.8",
+    "js-lexer": "^0.1.2",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
     "regenerator-runtime": "^0.13.9"

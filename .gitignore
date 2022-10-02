@@ -2,5 +2,6 @@ node_modules
 .vscode
 target
 .idea
+.DS_Store
 
 /add-in/dist
