@@ -4,7 +4,6 @@ services:
   sherlock-backend:
     container_name: sherlock-backend
     image: sherlock-backend:1.0.0
-    restart: always
     build:
       context: ./web-server
       dockerfile: ./Dockerfile
